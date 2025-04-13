@@ -2,6 +2,7 @@ package com.kotlin.bubbleview
 
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -16,10 +17,10 @@ import android.view.View
 import androidx.core.content.withStyledAttributes
 import kotlin.math.pow
 import kotlin.math.sqrt
+import androidx.core.graphics.get
 
 /**
- * 气泡视图 - Kotlin实现版本
- * 使用Kotlin语言特性和Jetpack组件优化
+ * 气泡视图
  */
 class BubbleView @JvmOverloads constructor(
     context: Context,
@@ -142,6 +143,7 @@ class BubbleView @JvmOverloads constructor(
         drawText(canvas)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -197,10 +199,8 @@ class BubbleView @JvmOverloads constructor(
             for (j in 0 until Particle.PARTICLE_COUNT) {
                 val width = endCircle.x - endCircle.radius + i * particleRadius * 2
                 val height = endCircle.y - endCircle.radius + j * particleRadius * 2
-                val color = bitmap.getPixel(
-                    bitmapWidth / Particle.PARTICLE_COUNT * i,
-                    bitmapHeight / Particle.PARTICLE_COUNT * j
-                )
+                val color =
+                    bitmap[bitmapWidth / Particle.PARTICLE_COUNT * i, bitmapHeight / Particle.PARTICLE_COUNT * j]
                 
                 val particle = Particle(width, height, particleRadius, color)
                 particleList.add(particle)

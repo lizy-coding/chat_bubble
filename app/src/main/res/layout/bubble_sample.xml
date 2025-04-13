@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="气泡视图示例"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/descriptionText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="触摸并拖动下方的气泡，松开查看动画效果"
+        app:layout_constraintTop_toBottomOf="@id/titleText"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.kotlin.bubbleview.BubbleView
+        android:id="@+id/bubbleView"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="32dp"
+        app:bubbleText="99+"
+        app:bubbleColor="#FF4081"
+        app:textColor="#FFFFFF"
+        app:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/descriptionText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.kotlin.bubbleview.BubbleView
+        android:id="@+id/bubbleView2"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="32dp"
+        app:bubbleText="8"
+        app:bubbleColor="#3F51B5"
+        app:textColor="#FFFFFF"
+        app:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/bubbleView"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.kotlin.bubbleview.BubbleView
+        android:id="@+id/bubbleView3"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="32dp"
+        app:bubbleText="NEW"
+        app:bubbleColor="#4CAF50"
+        app:textColor="#FFFFFF"
+        app:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/bubbleView"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

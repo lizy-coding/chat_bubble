@@ -4,9 +4,6 @@ import android.content.Context
 import android.content.res.Resources
 import android.util.TypedValue
 
-/**
- * 扩展函数 - 替代原来的Density工具类
- */
 
 /**
  * 将dp转换为像素
@@ -40,6 +37,7 @@ fun Context.spToPx(sp: Float): Int {
 /**
  * 将像素转换为sp
  */
+@Suppress("DEPRECATION")
 fun Context.pxToSp(px: Float): Int {
     return (px / resources.displayMetrics.scaledDensity + 0.5f).toInt()
 }

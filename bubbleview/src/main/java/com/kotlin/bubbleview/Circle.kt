@@ -2,7 +2,6 @@ package com.kotlin.bubbleview
 
 /**
  * 圆数据类
- * 使用Kotlin数据类替代Java类
  */
 data class Circle(
     var x: Float,

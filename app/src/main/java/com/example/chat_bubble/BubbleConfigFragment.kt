@@ -50,6 +50,8 @@ class BubbleConfigFragment : Fragment() {
         setupListeners()
         // 设置初始值
         updateUIValues()
+        // 立即应用设置，确保预览气泡使用增强效果
+        applySettings()
     }
     
     private fun initViews(view: View) {
@@ -65,13 +67,13 @@ class BubbleConfigFragment : Fragment() {
         seekBarAlphaFactor = view.findViewById(R.id.seekBarAlphaFactor)
         seekBarBreakDistance = view.findViewById(R.id.seekBarBreakDistance)
         
-        // 设置初始进度条值
+        // 设置初始进度条值 - 使用增强的参数
         seekBarParticleCount.progress = Particle.PARTICLE_COUNT
-        seekBarDuration.progress = 1500
-        seekBarSpeedFactor.progress = 100 // 1.0f * 100
-        seekBarSizeFactor.progress = 100  // 1.0f * 100
-        seekBarAlphaFactor.progress = 100 // 1.0f * 100
-        seekBarBreakDistance.progress = 5 // 5.0f
+        seekBarDuration.progress = 3000  // 整体动画时间
+        seekBarSpeedFactor.progress = 120 // 速度
+        seekBarSizeFactor.progress = 85   // 颗粒缩放
+        seekBarAlphaFactor.progress = 120 // 透明度变化
+        seekBarBreakDistance.progress = 4 // 触发距离
         
         // 初始化显示文本
         tvParticleCount = view.findViewById(R.id.tvParticleCount)
@@ -86,6 +88,11 @@ class BubbleConfigFragment : Fragment() {
         val seekBarChangeListener = object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 updateUIValues()
+                
+                // 实时应用当前更改的滑块值，实现即时预览
+                if (fromUser) {
+                    applySettings()
+                }
             }
             
             override fun onStartTrackingTouch(seekBar: SeekBar) {}

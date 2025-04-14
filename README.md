@@ -246,19 +246,18 @@ dependencies {
 ### 2. 在布局中使用BubbleView
 
 ```xml
-<com.kotlin.bubbleview.BubbleView
-    android:id="@+id/bubbleView"
-    android:layout_width="120dp"
-    android:layout_height="120dp"
-    app:bubbleText="99+"
-    app:bubbleColor="#FF4081"
-    app:textColor="#FFFFFF"
-    app:textSize="16sp"
-    app:particleCount="15"                <!-- 粒子数量 -->
-    app:explosionDuration="1500"          <!-- 爆炸动画持续时间 -->
-    app:particleSpeedFactor="1.0"         <!-- 粒子速度因子 -->
-    app:particleSizeFactor="1.0"          <!-- 粒子大小变化因子 -->
-    app:particleAlphaFactor="1.0" />      <!-- 粒子透明度变化因子 -->
+    <com.kotlin.bubbleview.BubbleView
+        android:id="@+id/bubbleView"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="32dp"
+        app:bubbleText="99+"
+        app:bubbleColor="#FF4081"
+        app:textColor="#FFFFFF"
+        app:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/descriptionText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 ```
 
 ### 3. 在代码中设置监听器和参数
@@ -274,16 +273,16 @@ bubbleView.onAnimationEndListener = object : BubbleView.OnAnimationEndListener {
 }
 
 // 自定义粒子爆炸效果
-bubbleView.setExplosionParams(
-    count = 20,             // 粒子数量
-    duration = 2000,        // 持续时间(毫秒)
-    speedFactor = 1.5f,     // 速度因子
-    sizeFactor = 0.8f,      // 大小变化因子
-    alphaFactor = 1.2f      // 透明度变化因子
-)
+seekBarParticleCount.progress = Particle.PARTICLE_COUNT
+seekBarDuration.progress = 3000  // 整体动画时间
+seekBarSpeedFactor.progress = 120 // 速度
+seekBarSizeFactor.progress = 85   // 颗粒缩放
+seekBarAlphaFactor.progress = 120 // 透明度变化
+seekBarBreakDistance.progress = 4 // 触发距离
 
 // 设置断开连接的临界距离
-bubbleView.setBreakDistanceFactor(4.0f)  // 值越小，越容易断开
+testBubble.setBreakDistanceFactor(seekBarBreakDistance.progress / 1f)
+// 值越小，越容易断开
 ```
 
 ## 自定义属性

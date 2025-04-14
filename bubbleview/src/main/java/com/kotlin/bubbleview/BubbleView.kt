@@ -67,13 +67,13 @@ class BubbleView @JvmOverloads constructor(
             bubbleTextColor = getColor(R.styleable.BubbleView_textColor, Color.WHITE)
             textSize = getDimension(R.styleable.BubbleView_textSize, context.dpToPx(15f).toFloat())
             
-            // 读取粒子效果参数
+            // 读取粒子效果参数 - 使用更好的默认值
             val particleCount = getInteger(R.styleable.BubbleView_particleCount, Particle.PARTICLE_COUNT)
-            val explosionDuration = getInteger(R.styleable.BubbleView_explosionDuration, 1500)
-            val speedFactor = getFloat(R.styleable.BubbleView_particleSpeedFactor, 1.0f)
-            val sizeFactor = getFloat(R.styleable.BubbleView_particleSizeFactor, 1.0f)
-            val alphaFactor = getFloat(R.styleable.BubbleView_particleAlphaFactor, 1.0f)
-            val breakFactor = getFloat(R.styleable.BubbleView_explosionDuration, 5.0f)
+            val explosionDuration = getInteger(R.styleable.BubbleView_explosionDuration, 800)
+            val speedFactor = getFloat(R.styleable.BubbleView_particleSpeedFactor, 1.7f)
+            val sizeFactor = getFloat(R.styleable.BubbleView_particleSizeFactor, 0.85f)
+            val alphaFactor = getFloat(R.styleable.BubbleView_particleAlphaFactor, 1.2f)
+            val breakFactor = getFloat(R.styleable.BubbleView_explosionDuration, 4.0f)
             
             // 设置粒子效果参数
             particleStrategy.setEffectParams(

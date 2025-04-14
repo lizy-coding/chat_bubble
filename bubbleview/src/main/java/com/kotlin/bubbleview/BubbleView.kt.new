@@ -312,7 +312,7 @@ class BubbleView @JvmOverloads constructor(
     /**
      * 设置文字大小
      */
-    override fun setTextSize(size: Float) {
+    fun setTextSize(size: Float) {
         this.textSize = size
         textPaint.textSize = size
         invalidate()

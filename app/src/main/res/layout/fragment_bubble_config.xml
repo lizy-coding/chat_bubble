@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="粒子效果参数设置"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+            
+        <com.kotlin.bubbleview.BubbleView
+            android:id="@+id/bubbleViewPreview"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="24dp"
+            app:bubbleText="测试"
+            app:bubbleColor="#FF4081"
+            app:textColor="#FFFFFF" />
+            
+        <Button
+            android:id="@+id/btnTestExplosion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="测试爆炸效果"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="24dp" />
+            
+        <!-- 粒子数量 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="粒子数量"
+            android:textStyle="bold" />
+            
+        <SeekBar
+            android:id="@+id/seekBarParticleCount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="30"
+            android:progress="15" />
+            
+        <TextView
+            android:id="@+id/tvParticleCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="15"
+            android:layout_marginBottom="16dp" />
+            
+        <!-- 爆炸持续时间 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="爆炸持续时间(毫秒)"
+            android:textStyle="bold" />
+            
+        <SeekBar
+            android:id="@+id/seekBarDuration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="3000"
+            android:progress="1500" />
+            
+        <TextView
+            android:id="@+id/tvDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1500"
+            android:layout_marginBottom="16dp" />
+            
+        <!-- 速度因子 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="速度因子"
+            android:textStyle="bold" />
+            
+        <SeekBar
+            android:id="@+id/seekBarSpeedFactor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="300"
+            android:progress="100" />
+            
+        <TextView
+            android:id="@+id/tvSpeedFactor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1.0"
+            android:layout_marginBottom="16dp" />
+            
+        <!-- 大小变化因子 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="大小变化因子"
+            android:textStyle="bold" />
+            
+        <SeekBar
+            android:id="@+id/seekBarSizeFactor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="300"
+            android:progress="100" />
+            
+        <TextView
+            android:id="@+id/tvSizeFactor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1.0"
+            android:layout_marginBottom="16dp" />
+            
+        <!-- 透明度变化因子 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="透明度变化因子"
+            android:textStyle="bold" />
+            
+        <SeekBar
+            android:id="@+id/seekBarAlphaFactor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="300"
+            android:progress="100" />
+            
+        <TextView
+            android:id="@+id/tvAlphaFactor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1.0"
+            android:layout_marginBottom="16dp" />
+            
+        <!-- 断开连接距离 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="断开连接距离因子"
+            android:textStyle="bold" />
+            
+        <SeekBar
+            android:id="@+id/seekBarBreakDistance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="20"
+            android:progress="5" />
+            
+        <TextView
+            android:id="@+id/tvBreakDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5.0"
+            android:layout_marginBottom="16dp" />
+            
+        <!-- 应用按钮 -->
+        <Button
+            android:id="@+id/btnApplySettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="应用设置"
+            android:layout_marginTop="16dp" />
+            
+    </LinearLayout>
+</ScrollView>

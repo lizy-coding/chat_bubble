@@ -59,6 +59,6 @@ data class Particle(
     }
     
     companion object {
-        const val PARTICLE_COUNT = 15  // 增加粒子数量，使效果更细腻
+        const val PARTICLE_COUNT = 30  // 增加粒子数量，使效果更细腻
     }
 }

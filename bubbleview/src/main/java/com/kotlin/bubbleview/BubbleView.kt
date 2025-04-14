@@ -11,7 +11,6 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Rect
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.withStyledAttributes
@@ -50,19 +49,19 @@ class BubbleView @JvmOverloads constructor(
     private val quadControlE = Point()
     
     // 圆心相距的距离
-    private var circleCenterDistan = 0f
+    private var circleCenterDistant = 0f
     
     // 是否能画path
     private var canDrawPath = true
     
     // 文本
-    private var text = ""
+    private var bubbleText = ""
     
     // 圆的颜色
     private var circleColor = Color.RED
     
     // 文字的颜色
-    private var textColor = Color.WHITE
+    private var bubbleTextColor = Color.WHITE
     
     // 文字的大小
     private var textSize = context.dpToPx(15f).toFloat()
@@ -77,7 +76,7 @@ class BubbleView @JvmOverloads constructor(
     private var bitmap: Bitmap? = null
     
     // 上次距离
-    private var lastDistan = 0f
+    private var lastDistant = 0f
     
     // 视图尺寸
     private var viewWidth = 0
@@ -85,19 +84,37 @@ class BubbleView @JvmOverloads constructor(
     
     // 动画结束的监听
     var onAnimationEndListener: OnAnimationEndListener? = null
+    
+    // 爆炸粒子效果参数
+    var particleCount = Particle.PARTICLE_COUNT
+    var explosionDuration = 1500 // 默认粒子爆炸动画持续时间(毫秒)
+    var particleSpeedFactor = 1.0f // 粒子速度因子
+    var particleSizeFactor = 1.0f // 粒子大小变化因子
+    var particleAlphaFactor = 1.0f // 粒子透明度变化因子
+    
+    // 临界距离因子 - 控制多大距离断开连接
+    private var breakDistanceFactor = 5.0f
 
     init {
         // 获取自定义属性
         context.withStyledAttributes(attrs, R.styleable.BubbleView) {
-            text = getString(R.styleable.BubbleView_bubbleText) ?: ""
+            bubbleText = getString(R.styleable.BubbleView_bubbleText) ?: ""
             circleColor = getColor(R.styleable.BubbleView_bubbleColor, Color.RED)
-            textColor = getColor(R.styleable.BubbleView_textColor, Color.WHITE)
+            bubbleTextColor = getColor(R.styleable.BubbleView_textColor, Color.WHITE)
             textSize = getDimension(R.styleable.BubbleView_textSize, context.dpToPx(15f).toFloat())
+            breakDistanceFactor = getFloat(R.styleable.BubbleView_explosionDuration, 5.0f)
+            
+            // 读取粒子效果参数
+            particleCount = getInteger(R.styleable.BubbleView_particleCount, Particle.PARTICLE_COUNT)
+            explosionDuration = getInteger(R.styleable.BubbleView_explosionDuration, 1500)
+            particleSpeedFactor = getFloat(R.styleable.BubbleView_particleSpeedFactor, 1.0f)
+            particleSizeFactor = getFloat(R.styleable.BubbleView_particleSizeFactor, 1.0f)
+            particleAlphaFactor = getFloat(R.styleable.BubbleView_particleAlphaFactor, 1.0f)
         }
         
         // 初始化画笔
         circlePaint.color = circleColor
-        textPaint.color = textColor
+        textPaint.color = bubbleTextColor
         textPaint.textSize = textSize
     }
 
@@ -120,7 +137,7 @@ class BubbleView @JvmOverloads constructor(
         setMeasuredDimension(width, height)
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+    public override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         viewWidth = w
         viewHeight = h
@@ -156,7 +173,7 @@ class BubbleView @JvmOverloads constructor(
                 endCircle.set(x, y)
                 computePath()
                 invalidate()
-                lastDistan = circleCenterDistan
+                lastDistant = circleCenterDistant
                 parent.requestDisallowInterceptTouchEvent(true)
             }
             MotionEvent.ACTION_UP -> {
@@ -191,16 +208,18 @@ class BubbleView @JvmOverloads constructor(
         canDrawParticle = true
         particleList.clear()
         
-        val particleRadius = endCircle.radius * 2 / Particle.PARTICLE_COUNT / 2
+        // 使用自定义的粒子数量
+        val count = particleCount
+        val particleRadius = endCircle.radius * 2 / count / 2
         val bitmapWidth = bitmap.width
         val bitmapHeight = bitmap.height
         
-        for (i in 0 until Particle.PARTICLE_COUNT) {
-            for (j in 0 until Particle.PARTICLE_COUNT) {
+        for (i in 0 until count) {
+            for (j in 0 until count) {
                 val width = endCircle.x - endCircle.radius + i * particleRadius * 2
                 val height = endCircle.y - endCircle.radius + j * particleRadius * 2
                 val color =
-                    bitmap[bitmapWidth / Particle.PARTICLE_COUNT * i, bitmapHeight / Particle.PARTICLE_COUNT * j]
+                    bitmap[bitmapWidth / count * i, bitmapHeight / count * j]
                 
                 val particle = Particle(width, height, particleRadius, color)
                 particleList.add(particle)
@@ -213,11 +232,17 @@ class BubbleView @JvmOverloads constructor(
      */
     private fun startAnimation() {
         ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 1500
+            duration = explosionDuration.toLong() // 使用自定义的动画持续时间
             addUpdateListener { animator ->
                 val value = animator.animatedValue as Float
                 particleList.forEach { particle ->
-                    particle.broken(value, measuredWidth, measuredHeight)
+                    // 传递自定义参数到粒子
+                    particle.broken(
+                        value, measuredWidth, measuredHeight,
+                        particleSpeedFactor,
+                        particleSizeFactor,
+                        particleAlphaFactor
+                    )
                 }
                 invalidate()
             }
@@ -261,21 +286,21 @@ class BubbleView @JvmOverloads constructor(
         val endY = endCircle.y
         
         // 计算圆心的距离
-        circleCenterDistan = sqrt((startX - endX).pow(2) + (startY - endY).pow(2))
+        circleCenterDistant = sqrt((startX - endX).pow(2) + (startY - endY).pow(2))
         
-        // 如果圆心的距离大于半径的5倍或者起点圆半径小于等于原来半径的1/5
-        if (circleCenterDistan > endCircle.radius * 5 || startCircle.radius <= endCircle.radius / 5) {
+        // 如果圆心的距离大于临界值或者起点圆半径小于等于原来半径的1/5
+        if (circleCenterDistant > endCircle.radius * breakDistanceFactor || startCircle.radius <= endCircle.radius / 5) {
             canDrawPath = false
             return
         }
         
         // 计算起点圆的半径
-        if (circleCenterDistan > endCircle.radius) {
-            startCircle.radius -= (circleCenterDistan - lastDistan) / 5
+        if (circleCenterDistant > endCircle.radius) {
+            startCircle.radius -= (circleCenterDistant - lastDistant) / 5
         }
         
-        val cos = (endY - startY) / circleCenterDistan
-        val sin = (endX - startX) / circleCenterDistan
+        val cos = (endY - startY) / circleCenterDistant
+        val sin = (endX - startX) / circleCenterDistant
         
         // 计算控制点
         startCircleA.set(
@@ -328,15 +353,15 @@ class BubbleView @JvmOverloads constructor(
      * 画文字
      */
     private fun drawText(canvas: Canvas) {
-        if (text.isEmpty()) return
+        if (bubbleText.isEmpty()) return
         
         val rect = Rect()
-        textPaint.getTextBounds(text, 0, text.length, rect)
-        val textWidth = textPaint.measureText(text)
+        textPaint.getTextBounds(bubbleText, 0, bubbleText.length, rect)
+        val textWidth = textPaint.measureText(bubbleText)
         val x = endCircle.x - textWidth / 2
         val y = endCircle.y + (rect.bottom - rect.top) / 2
         
-        canvas.drawText(text, x, y, textPaint)
+        canvas.drawText(bubbleText, x, y, textPaint)
     }
 
     /**
@@ -351,20 +376,41 @@ class BubbleView @JvmOverloads constructor(
     }
 
     /**
+     * 获取文本
+     */
+    fun getText(): String {
+        return bubbleText
+    }
+
+    /**
      * 设置文字
      */
     fun setText(text: String) {
-        this.text = text
+        this.bubbleText = text
         invalidate()
+    }
+
+    /**
+     * 获取文字颜色
+     */
+    fun getTextColor(): Int {
+        return bubbleTextColor
     }
 
     /**
      * 设置文字颜色
      */
     fun setTextColor(textColor: Int) {
-        this.textColor = textColor
+        this.bubbleTextColor = textColor
         textPaint.color = textColor
         invalidate()
+    }
+
+    /**
+     * 获取圆的颜色
+     */
+    fun getCircleColor(): Int {
+        return circleColor
     }
 
     /**
@@ -396,9 +442,40 @@ class BubbleView @JvmOverloads constructor(
         endCircle.set(viewWidth / 2f, viewHeight / 2f)
         startCircle.set(viewWidth / 2f, viewHeight / 2f)
         startCircle.radius = viewWidth / 2f
-        circleCenterDistan = 0f
+        circleCenterDistant = 0f
         computePath()
         invalidate()
+    }
+
+    /**
+     * 设置粒子爆炸参数
+     */
+    fun setExplosionParams(
+        count: Int = particleCount,
+        duration: Int = explosionDuration,
+        speedFactor: Float = particleSpeedFactor,
+        sizeFactor: Float = particleSizeFactor,
+        alphaFactor: Float = particleAlphaFactor
+    ) {
+        this.particleCount = count
+        this.explosionDuration = duration
+        this.particleSpeedFactor = speedFactor
+        this.particleSizeFactor = sizeFactor
+        this.particleAlphaFactor = alphaFactor
+    }
+    
+    /**
+     * 获取断开连接的临界距离因子
+     */
+    fun getBreakDistanceFactor(): Float {
+        return breakDistanceFactor
+    }
+    
+    /**
+     * 设置断开连接的临界距离因子
+     */
+    fun setBreakDistanceFactor(factor: Float) {
+        this.breakDistanceFactor = factor
     }
 
     /**

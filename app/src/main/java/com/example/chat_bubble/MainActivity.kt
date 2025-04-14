@@ -33,11 +33,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // Handle action bar item clicks here.
         return when (item.itemId) {
-            R.id.action_settings -> true
+            R.id.action_settings -> {
+                // 打开配置界面
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, BubbleConfigFragment.newInstance())
+                    .addToBackStack(null)
+                    .commit()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }

@@ -40,6 +40,7 @@ chat_bubble/
 - 可自定义气泡颜色、文字和样式
 - 支持动画结束回调
 - 支持灵活的布局配置
+- 支持自定义粒子效果参数
 
 ## 气泡实现原理
 
@@ -110,7 +111,7 @@ private fun computePath() {
 当拖拽超过临界距离并松开手指时，气泡会爆炸成多个粒子：
 
 1. 基于原气泡生成位图
-2. 将位图分解为多个粒子（默认为10×10的网格）
+2. 将位图分解为多个粒子（粒子数量可配置）
 3. 使用`ValueAnimator`动画控制粒子扩散和透明度变化
 
 ```kotlin
@@ -121,13 +122,14 @@ private fun generateParticles(bitmap: Bitmap) {
     canDrawParticle = true
     particleList.clear()
     
-    val particleRadius = endCircle.radius * 2 / Particle.PARTICLE_COUNT / 2
+    val count = particleCount // 可自定义粒子数量
+    val particleRadius = endCircle.radius * 2 / count / 2
     val bitmapWidth = bitmap.width
     val bitmapHeight = bitmap.height
     
     // 根据位图生成粒子网格
-    for (i in 0 until Particle.PARTICLE_COUNT) {
-        for (j in 0 until Particle.PARTICLE_COUNT) {
+    for (i in 0 until count) {
+        for (j in 0 until count) {
             // 计算粒子位置和颜色
             // ...
             particleList.add(Particle(cx, cy, particleRadius, color))
@@ -140,12 +142,19 @@ private fun generateParticles(bitmap: Bitmap) {
  */
 private fun startAnimation() {
     val animator = ValueAnimator.ofFloat(0f, 1f)
-    animator.duration = 500
+    animator.duration = explosionDuration // 可自定义动画持续时间
     animator.addUpdateListener { animation ->
         val value = animation.animatedValue as Float
         // 更新每个粒子的位置和透明度
         particleList.forEach { particle ->
-            particle.broken(value, viewWidth, viewHeight)
+            particle.broken(
+                value, 
+                viewWidth, 
+                viewHeight,
+                particleSpeedFactor,  // 速度因子
+                particleSizeFactor,   // 大小变化因子
+                particleAlphaFactor   // 透明度变化因子
+            )
         }
         // 重绘视图
         invalidate()
@@ -160,6 +169,57 @@ private fun startAnimation() {
     })
     
     animator.start()
+}
+```
+
+### 粒子爆炸参数控制
+
+粒子爆炸效果支持多种参数控制，可实现各种不同的视觉效果：
+
+```kotlin
+// 在代码中设置爆炸效果参数
+bubbleView.setExplosionParams(
+    count = 15,             // 粒子数量，数量越多效果越细腻
+    duration = 1500,        // 爆炸动画持续时间(毫秒)
+    speedFactor = 1.5f,     // 粒子速度因子，越大飞得越远
+    sizeFactor = 1.0f,      // 粒子大小变化因子，越大缩小得越快
+    alphaFactor = 0.8f      // 透明度变化因子，越大消失得越快
+)
+
+// 设置断开连接的临界距离
+bubbleView.setBreakDistanceFactor(5.0f)
+```
+
+粒子爆炸算法实现（Particle.kt）：
+
+```kotlin
+fun broken(
+    factor: Float,          // 动画进度(0-1)
+    width: Int,             // 视图宽度
+    height: Int,            // 视图高度
+    speedFactor: Float,     // 速度因子
+    sizeFactor: Float,      // 大小变化因子
+    alphaFactor: Float      // 透明度变化因子
+) {
+    // 计算方向性移动
+    val distance = factor * speed * speedFactor * width / 6
+    cx += distance * cos(angle)
+    cy += distance * sin(angle)
+    
+    // 添加重力效果
+    cy += factor * factor * height / 3
+    
+    // 添加随机抖动
+    if (random.nextFloat() > 0.7f) {
+        cx += (random.nextFloat() - 0.5f) * width / 20 * factor
+        cy += (random.nextFloat() - 0.5f) * height / 20 * factor
+    }
+    
+    // 缩小粒子大小
+    radius = radius * (1f - factor * sizeFactor * 0.7f)
+    
+    // 透明度变化
+    alpha = (1f - factor * alphaFactor) * (1 + random.nextFloat() * 0.3f)
 }
 ```
 
@@ -186,17 +246,21 @@ dependencies {
 ### 2. 在布局中使用BubbleView
 
 ```xml
-<com.kotlin.bubbleview.BubbleView
-    android:id="@+id/bubbleView"
-    android:layout_width="120dp"
-    android:layout_height="120dp"
-    app:bubbleText="99+"
-    app:bubbleColor="#FF4081"
-    app:textColor="#FFFFFF"
-    app:textSize="16sp" />
+    <com.kotlin.bubbleview.BubbleView
+        android:id="@+id/bubbleView"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="32dp"
+        app:bubbleText="99+"
+        app:bubbleColor="#FF4081"
+        app:textColor="#FFFFFF"
+        app:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/descriptionText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 ```
 
-### 3. 在代码中设置监听器
+### 3. 在代码中设置监听器和参数
 
 ```kotlin
 // 设置气泡的动画结束监听器
@@ -207,6 +271,18 @@ bubbleView.onAnimationEndListener = object : BubbleView.OnAnimationEndListener {
         // 例如隐藏气泡或更新UI状态
     }
 }
+
+// 自定义粒子爆炸效果
+seekBarParticleCount.progress = Particle.PARTICLE_COUNT
+seekBarDuration.progress = 3000  // 整体动画时间
+seekBarSpeedFactor.progress = 120 // 速度
+seekBarSizeFactor.progress = 85   // 颗粒缩放
+seekBarAlphaFactor.progress = 120 // 透明度变化
+seekBarBreakDistance.progress = 4 // 触发距离
+
+// 设置断开连接的临界距离
+testBubble.setBreakDistanceFactor(seekBarBreakDistance.progress / 1f)
+// 值越小，越容易断开
 ```
 
 ## 自定义属性
@@ -219,6 +295,11 @@ BubbleView支持以下自定义属性：
 | `app:bubbleColor` | 气泡的背景颜色 | Color.RED |
 | `app:textColor` | 文本颜色 | Color.WHITE |
 | `app:textSize` | 文本大小 | 15sp |
+| `app:particleCount` | 粒子数量 | 15 |
+| `app:explosionDuration` | 爆炸动画持续时间(毫秒) | 1500 |
+| `app:particleSpeedFactor` | 粒子速度因子 | 1.0 |
+| `app:particleSizeFactor` | 粒子大小变化因子 | 1.0 |
+| `app:particleAlphaFactor` | 粒子透明度变化因子 | 1.0 |
 
 ## 示例应用
 
@@ -227,6 +308,7 @@ BubbleView支持以下自定义属性：
 1. 不同大小和颜色的气泡
 2. 气泡拖拽效果
 3. 爆炸效果及回调处理
+4. 粒子效果参数配置界面
 
 ## 开发环境
 
